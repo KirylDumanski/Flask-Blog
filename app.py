@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, flash
+from flask import Flask, render_template, request, flash, session, redirect, url_for, abort
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'aSDSfg__31f^%^&dfdTT>|21dhjkdf%^*=--0234ksldfn'
@@ -22,6 +22,23 @@ def feedback():
         else:
             flash('Sending error', category='error')
     return render_template('feedback.html', title="Feedback!", menu=menu)
+
+
+@app.route("/login", methods=["POST", "GET"])
+def login():
+    if 'userLogged' in session:
+        return redirect(url_for('profile', username=session['userLogged']))
+    elif request.method == "POST" and request.form['username'] == 'Admin' and request.form['password'] == 'admin':
+        session['userLogged'] = request.form['username']
+        return redirect(url_for('profile', username=session['userLogged']))
+    return render_template('login.html', title='Authorization', menu=menu)
+
+
+@app.route("/profile/<username>")
+def profile(username):
+    if 'userLogged' not in session or session['userLogged'] != username:
+        abort(401)
+    return f"{username}'s profile."
 
 
 @app.errorhandler(404)
