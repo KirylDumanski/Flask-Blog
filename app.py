@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import Flask, render_template, request, flash, session, redirect, url_for, abort
 from flask_sqlalchemy import SQLAlchemy
 
@@ -12,6 +14,16 @@ menu = [{"name": "Main page", "url": "index"},
         {"name": "Add post", "url": "add-post"},
         {"name": "Feedback", "url": "feedback"},
         {"name": "Login", "url": "login"}]
+
+
+class Article(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False, unique=True)
+    text = db.Column(db.Text, nullable=False)
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"<Article {self.id}>"
 
 
 @app.route("/index")
