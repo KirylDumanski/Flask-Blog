@@ -29,7 +29,26 @@ class Article(db.Model):
 @app.route("/index")
 @app.route("/")
 def index():
-    return render_template('index.html', title='Main page', menu=menu)
+    articles = Article.query.order_by(Article.date).all()
+    return render_template('index.html', title='Main page', menu=menu, articles=articles)
+
+
+@app.route("/add-post", methods=["POST", "GET"])
+def add_post():
+    if request.method == 'POST':
+        try:
+            article = Article(title=request.form['title'],
+                              text=request.form['text'])
+            db.session.add(article)
+            db.session.flush()
+            flash('Post added', category='success')
+        except:
+            db.session.rollback()
+            flash('Adding post error', category='error')
+        else:
+            db.session.commit()
+
+    return render_template('add_post.html', title='Add post', menu=menu)
 
 
 @app.route("/feedback", methods=["POST", "GET"])

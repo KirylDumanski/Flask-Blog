@@ -1,7 +1,20 @@
 {%extends 'base.html'%}
 
 {%block content%}
-  {{super()}}
+
 <h1>About Flask</h1>
-<hr>
+
+<div class="col-md">
+  {%for article in articles%}
+  <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+    <div class="col p-4 d-flex flex-column position-static">
+      <h3 class="mb-0">{{article.title}}</h3>
+      <div class="mb-1 text-muted">{{article.date.date()}}</div>
+      <p class="card-text mb-auto">{{article.text}}</p>
+      <a href="#" class="stretched-link text-end">Continue reading</a>
+    </div>
+  </div>
+  {%endfor%}
+</div>
+
 {%endblock%}
