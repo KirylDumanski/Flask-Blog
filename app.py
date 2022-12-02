@@ -2,6 +2,7 @@ from datetime import datetime
 
 from flask import Flask, render_template, request, flash, session, redirect, url_for, abort
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import desc
 
 SECRET_KEY = 'development_key'
 SQLALCHEMY_DATABASE_URI = 'sqlite:///flask-site.db'
@@ -14,6 +15,11 @@ menu = [{"name": "Main page", "url": "index"},
         {"name": "Add post", "url": "add-post"},
         {"name": "Feedback", "url": "feedback"},
         {"name": "Login", "url": "login"}]
+
+
+@app.context_processor
+def inject_mainmenu():
+    return dict(menu=menu)
 
 
 class Article(db.Model):
@@ -29,8 +35,8 @@ class Article(db.Model):
 @app.route("/index")
 @app.route("/")
 def index():
-    articles = Article.query.order_by(Article.date).all()
-    return render_template('index.html', title='Main page', menu=menu, articles=articles)
+    articles = Article.query.order_by(desc(Article.date)).all()
+    return render_template('index.html', title='Main page', articles=articles)
 
 
 @app.route("/add-post", methods=["POST", "GET"])
@@ -48,7 +54,7 @@ def add_post():
         else:
             db.session.commit()
 
-    return render_template('add_post.html', title='Add post', menu=menu)
+    return render_template('add_post.html', title='Add post')
 
 
 @app.route("/feedback", methods=["POST", "GET"])
@@ -58,7 +64,7 @@ def feedback():
             flash('Message sent', category='success')
         else:
             flash('Sending error', category='error')
-    return render_template('feedback.html', title="Feedback!", menu=menu)
+    return render_template('feedback.html', title="Feedback!")
 
 
 @app.route("/login", methods=["POST", "GET"])
@@ -68,7 +74,7 @@ def login():
     elif request.method == "POST" and request.form['username'] == 'Admin' and request.form['password'] == 'admin':
         session['userLogged'] = request.form['username']
         return redirect(url_for('profile', username=session['userLogged']))
-    return render_template('login.html', title='Authorization', menu=menu)
+    return render_template('login.html', title='Authorization')
 
 
 @app.route("/profile/<username>")
@@ -80,7 +86,7 @@ def profile(username):
 
 @app.errorhandler(404)
 def page_not_found(error):
-    return render_template('page404.html', title='Page not found', menu=menu), 404
+    return render_template('page404.html', title='Page not found'), 404
 
 
 if __name__ == '__main__':
