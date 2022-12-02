@@ -2,8 +2,9 @@ from flask import Flask, render_template
 
 app = Flask(__name__)
 
-
-menu = ["Install", "First app", "Feedback"]
+menu = [{"name": "Install", "url": "install-flask"},
+        {"name": "First app", "url": "first-app"},
+        {"name": "Feedback", "url": "feedback"}]
 
 
 @app.route("/index")
@@ -12,9 +13,9 @@ def index():
     return render_template('index.html', title='Main page!', menu=menu)
 
 
-@app.route("/about")
-def about():
-    return render_template('about.html', title="About us!", menu=menu)
+@app.route("/feedback")
+def feedback():
+    return render_template('feedback.html', title="Feedback!", menu=menu)
 
 
 if __name__ == '__main__':
