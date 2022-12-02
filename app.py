@@ -1,6 +1,7 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, flash
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'aSDSfg__31f^%^&dfdTT>|21dhjkdf%^*=--0234ksldfn'
 
 menu = [{"name": "Install", "url": "install-flask"},
         {"name": "First app", "url": "first-app"},
@@ -13,8 +14,13 @@ def index():
     return render_template('index.html', title='Main page!', menu=menu)
 
 
-@app.route("/feedback")
+@app.route("/feedback", methods=["POST", "GET"])
 def feedback():
+    if request.method == 'POST':
+        if len(request.form['username']) > 3:
+            flash('Message sent', category='success')
+        else:
+            flash('Sending error', category='error')
     return render_template('feedback.html', title="Feedback!", menu=menu)
 
 

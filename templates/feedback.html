@@ -1,6 +1,19 @@
 {%extends 'base.html'%}
 
 {%block content%}
-  {{super()}}
+{{super()}}
 <p>Contact us with filling the form below!</p>
+<div class="col-5">
+  {%for category, message in get_flashed_messages(True)%}
+    <div class="flash {{category}}">{{message}}</div>
+  {%endfor%}
+  <form action="/feedback" method="post">
+    <p><label>Name: </label><input type="text" name="username" class="form-control" required/>
+    <p><label>Email: </label><input type="text" name="email" class="form-control" required/>
+    <p><label>Message:</label></p>
+    <p><textarea name="message" cols="30" rows="5" class="form-control"></textarea>
+    <p class="text"><input type="submit" value="Send" class="btn btn-primary"/>
+  </form>
+</div>
+
 {%endblock%}
