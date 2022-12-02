@@ -1,17 +1,23 @@
 from flask import Flask, render_template, request, flash, session, redirect, url_for, abort
+from flask_sqlalchemy import SQLAlchemy
+
+SECRET_KEY = 'development_key'
+SQLALCHEMY_DATABASE_URI = 'sqlite:///flask-site.db'
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'aSDSfg__31f^%^&dfdTT>|21dhjkdf%^*=--0234ksldfn'
+app.config.from_object(__name__)
+db = SQLAlchemy(app)
 
-menu = [{"name": "Install", "url": "install-flask"},
-        {"name": "First app", "url": "first-app"},
-        {"name": "Feedback", "url": "feedback"}]
+menu = [{"name": "Main page", "url": "index"},
+        {"name": "Add post", "url": "add-post"},
+        {"name": "Feedback", "url": "feedback"},
+        {"name": "Login", "url": "login"}]
 
 
 @app.route("/index")
 @app.route("/")
 def index():
-    return render_template('index.html', title='Main page!', menu=menu)
+    return render_template('index.html', title='Main page', menu=menu)
 
 
 @app.route("/feedback", methods=["POST", "GET"])
