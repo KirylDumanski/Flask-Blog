@@ -24,5 +24,10 @@ def feedback():
     return render_template('feedback.html', title="Feedback!", menu=menu)
 
 
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('page404.html', title='Page not found', menu=menu), 404
+
+
 if __name__ == '__main__':
     app.run(debug=True)

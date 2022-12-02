@@ -1,0 +1,6 @@
+{%extends 'base.html'%}
+
+{%block content%}
+  {{super()}}
+  <p>Unfortunately, requested page not found. Go back to the <a href="{{url_for('index')}}">main page</a></p>
+{%endblock%}
