@@ -7,9 +7,10 @@
   {%for category, message in get_flashed_messages(True)%}
   <div class="flash {{category}}">{{message}}</div>
   {%endfor%}
-  <form action="/login" method="post">
+  <form action="" method="post">
     <p><label>Email: </label><input type="text" name="email" class="form-control" required></p>
     <p><label>Password: </label><input type="password" name="password" class="form-control" required></p>
+    <p><input type="checkbox" name="remember_me"> Remember me</p>
     <p class="text">
       <input type="submit" value="Login" class="btn btn-primary"/>
       <a href="{{url_for('register')}}" class="btn btn-success">Sign up</a>

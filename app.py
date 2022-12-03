@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import Flask, render_template, request, flash, session, redirect, url_for, abort
+from flask import Flask, render_template, request, flash, redirect, url_for
 from flask_login import LoginManager, login_user, login_required, current_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
 from slugify import slugify
@@ -16,6 +16,8 @@ app.config.from_object(__name__)
 db = SQLAlchemy(app)
 
 login_manager = LoginManager(app)
+login_manager.login_view = 'login'
+login_manager.login_message_category = 'success'
 
 menu = [{"name": "Main page", "url": "index"},
         {"name": "Add post", "url": "add-post"},
@@ -101,6 +103,7 @@ def index():
 
 
 @app.route("/post/<int:post_id>/<string:post_slug>")
+@login_required
 def post_detail(post_id, post_slug):
     try:
         article = Article.query.filter_by(id=post_id, slug=post_slug).one()
@@ -144,6 +147,7 @@ def post_update(post_id):
 
 
 @app.route("/add-post", methods=["POST", "GET"])
+@login_required
 def add_post():
     if request.method == 'POST':
         try:
@@ -206,12 +210,16 @@ def register():
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('profile'))
+
     if request.method == 'POST':
         user = Users.query.filter_by(email=request.form['email']).one()
         if user and check_password_hash(user.password, request.form['password']):
-            login_user(user)
+            rm = True if request.form.get('remember_me') else False
+            login_user(user, remember=rm)
             flash('Logged in successfully.', category='success')
-            return redirect(url_for('index'))
+            return redirect(request.args.get('next') or url_for('profile'))
         else:
             flash('Incorrect username and/or password entered', category='error')
 
@@ -222,20 +230,16 @@ def login():
 @login_required
 def logout():
     """Logout the current user."""
-    user = current_user
-    user.authenticated = False
-    db.session.add(user)
-    db.session.commit()
     logout_user()
     flash('Logged out successfully', category='success')
     return redirect(url_for('index'))
 
 
-@app.route("/profile/<username>")
-def profile(username):
-    if 'userLogged' not in session or session['userLogged'] != username:
-        abort(401)
-    return f"{username}'s profile."
+@app.route("/profile")
+@login_required
+def profile():
+    user = current_user
+    return render_template('profile.html', user=user)
 
 
 @app.errorhandler(404)

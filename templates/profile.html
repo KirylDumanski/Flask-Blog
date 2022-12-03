@@ -1,0 +1,18 @@
+{%extends 'base.html'%}
+
+{%block content%}
+{{super()}}
+<div class="col-5">
+  <h3>User profile</h3>
+  {%for category, message in get_flashed_messages(True)%}
+  <div class="flash {{category}}">{{message}}</div>
+  {%endfor%}
+  <div>
+    <p><b>Name:</b> {{user.profile.name}}</p>
+    <p><b>Email:</b> {{user.email}}</p>
+    <p><b>Age:</b> {{user.profile.age}}</p>
+    <p><b>City:</b> {{user.profile.city}}</p>
+  </div>
+</div>
+
+{%endblock%}
