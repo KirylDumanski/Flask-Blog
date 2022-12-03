@@ -18,11 +18,22 @@
   {%block mainmenu%}
   <div class="mainmenu">
     <header class="d-flex justify-content py-3">
-      <ul class="nav nav-pills">
+      <ul class="nav nav-pills mr-auto">
         {%for m in menu%}
         <li class="nav-item"><a href="/{{m.url}}" class="nav-link">{{m.name}}</a></li>
         {%endfor%}
       </ul>
+      <ul class="nav nav-pills ms-auto">
+        {% if current_user.is_authenticated %}
+          <li class="nav-item"><a href="#" class="nav-link">Hi, {{ current_user.profile.name }}!</a></li>
+          <li class="nav-item"><a href="{{url_for('logout')}}" class="nav-link">Logout</a></li>
+        {% else %}
+          <li class="nav-item"><a href="{{url_for('register')}}" class="nav-link">Register</a></li>
+          <li class="nav-item"><a href="{{url_for('login')}}" class="nav-link">Login</a></li>
+        {% endif %}
+      </ul>
+
+
     </header>
   </div>
   {%endblock mainmenu%}

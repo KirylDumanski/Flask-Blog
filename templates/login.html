@@ -3,10 +3,17 @@
 {%block content%}
 {{super()}}
 <div class="col-5">
+  <h1>Login form:</h1>
+  {%for category, message in get_flashed_messages(True)%}
+  <div class="flash {{category}}">{{message}}</div>
+  {%endfor%}
   <form action="/login" method="post">
-    <p><label>Name: </label><input type="text" name="username" class="form-control" required></p>
+    <p><label>Email: </label><input type="text" name="email" class="form-control" required></p>
     <p><label>Password: </label><input type="password" name="password" class="form-control" required></p>
-    <p class="text"><input type="submit" value="Login" class="btn btn-primary"/></p>
+    <p class="text">
+      <input type="submit" value="Login" class="btn btn-primary"/>
+      <a href="{{url_for('register')}}" class="btn btn-success">Sign up</a>
+    </p>
   </form>
 </div>
 

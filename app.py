@@ -1,10 +1,12 @@
 from datetime import datetime
 
 from flask import Flask, render_template, request, flash, session, redirect, url_for, abort
+from flask_login import LoginManager, login_user, login_required, current_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
 from slugify import slugify
 from sqlalchemy import desc
 from sqlalchemy.exc import NoResultFound, IntegrityError
+from werkzeug.security import generate_password_hash, check_password_hash
 
 SECRET_KEY = 'development_key'
 SQLALCHEMY_DATABASE_URI = 'sqlite:///flask-site.db'
@@ -13,10 +15,12 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 db = SQLAlchemy(app)
 
+login_manager = LoginManager(app)
+
 menu = [{"name": "Main page", "url": "index"},
         {"name": "Add post", "url": "add-post"},
-        {"name": "Feedback", "url": "feedback"},
-        {"name": "Login", "url": "login"}]
+        {"name": "Feedback", "url": "feedback"}
+        ]
 
 
 @app.context_processor
@@ -48,6 +52,45 @@ class Article(db.Model):
 
     def __repr__(self):
         return f"<Article {self.id}>"
+
+
+class Users(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(50), unique=True)
+    password = db.Column(db.String(500), nullable=True)
+    date = db.Column(db.Integer, default=datetime.utcnow)
+    profile = db.relationship('Profiles', backref='users', uselist=False)
+
+    def __repr__(self):
+        return f"<users {self.id}>"
+
+    def is_active(self):
+        return True
+
+    def get_id(self):
+        return str(self.id)
+
+    def is_authenticated(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+
+@login_manager.user_loader
+def user_loader(user_id):
+    return Users.query.get(user_id)
+
+
+class Profiles(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=True)
+    age = db.Column(db.Integer)
+    city = db.Column(db.String(100))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    def __repr__(self):
+        return f"profiles {self.id}"
 
 
 @app.route("/index")
@@ -129,14 +172,63 @@ def feedback():
     return render_template('feedback.html', title="Feedback!")
 
 
+@app.route("/register", methods=["POST", "GET"])
+def register():
+    if request.method == 'POST':
+        if len(request.form['name']) > 4 and '@' in request.form['email'] \
+                and len(request.form['password1']) > 4 and request.form['password1'] == request.form['password2']:
+            try:
+                password_hash = generate_password_hash(request.form['password1'])
+                user = Users(email=request.form['email'],
+                             password=password_hash)
+                db.session.add(user)
+                db.session.flush()
+
+                user_profile = Profiles(name=request.form['name'],
+                                        age=request.form['age'],
+                                        city=request.form['city'],
+                                        user_id=user.id)
+                db.session.add(user_profile)
+                db.session.commit()
+                flash("You have successfully registered!", category='success')
+                return redirect(url_for('login'))
+
+            except Exception as e:
+                db.session.rollback()
+                print(e)
+                flash("Registration error", category='error')
+
+        else:
+            flash("Fields filled out incorrectly")
+
+    return render_template('register.html', title='Sign up')
+
+
 @app.route("/login", methods=["POST", "GET"])
 def login():
-    if 'userLogged' in session:
-        return redirect(url_for('profile', username=session['userLogged']))
-    elif request.method == "POST" and request.form['username'] == 'Admin' and request.form['password'] == 'admin':
-        session['userLogged'] = request.form['username']
-        return redirect(url_for('profile', username=session['userLogged']))
+    if request.method == 'POST':
+        user = Users.query.filter_by(email=request.form['email']).one()
+        if user and check_password_hash(user.password, request.form['password']):
+            login_user(user)
+            flash('Logged in successfully.', category='success')
+            return redirect(url_for('index'))
+        else:
+            flash('Incorrect username and/or password entered', category='error')
+
     return render_template('login.html', title='Authorization')
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    """Logout the current user."""
+    user = current_user
+    user.authenticated = False
+    db.session.add(user)
+    db.session.commit()
+    logout_user()
+    flash('Logged out successfully', category='success')
+    return redirect(url_for('index'))
 
 
 @app.route("/profile/<username>")
