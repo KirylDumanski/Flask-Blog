@@ -1,0 +1,16 @@
+{%extends 'base.html'%}
+
+{%block content%}
+<h1>Add post</h1>
+<div class="col-5">
+  {%for category, message in get_flashed_messages(True)%}
+    <div class="flash {{category}}">{{message}}</div>
+  {%endfor%}
+  <form action="" method="post">
+    <p><label>Title: </label><input type="text" name="title" class="form-control" value="{{article.title}}" required/>
+    <p><label>Text: </label><textarea class="form-control" name="text" cols="30" rows="10" required>{{article.text}}</textarea>
+    <p class="text"><input type="submit" value="Update" class="btn btn-primary"/>
+  </form>
+</div>
+
+{%endblock%}

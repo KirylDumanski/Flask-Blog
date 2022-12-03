@@ -4,7 +4,7 @@ from flask import Flask, render_template, request, flash, session, redirect, url
 from flask_sqlalchemy import SQLAlchemy
 from slugify import slugify
 from sqlalchemy import desc
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound, IntegrityError
 
 SECRET_KEY = 'development_key'
 SQLALCHEMY_DATABASE_URI = 'sqlite:///flask-site.db'
@@ -64,7 +64,40 @@ def post_detail(post_id, post_slug):
     except NoResultFound:
         return render_template('page404.html', title='Page not found'), 404
 
-    return render_template('post.html', article=article, title=article.title)
+    return render_template('post_detail.html', article=article, title=article.title)
+
+
+@app.route("/post/delete/<int:post_id>")
+def post_delete(post_id):
+    article = Article.query.get_or_404(post_id)
+    try:
+        db.session.delete(article)
+        db.session.commit()
+        flash('Post successfully deleted!', category='success')
+        return redirect(url_for('index'))
+    except Exception as e:
+        print(e)
+        flash('An error occurred while deleting', category='error')
+        return render_template(url_for('post_detail', post_id=article.id, post_slug=article.slug),
+                               title='Add post')
+
+
+@app.route("/post/update/<int:post_id>", methods=["GET", "POST"])
+def post_update(post_id):
+    article = Article.query.get_or_404(post_id)
+    if request.method == 'POST':
+        try:
+            article.title = request.form['title']
+            article.text = str(request.form['text'])
+            article.slug = slugify(request.form['title'])
+            db.session.commit()
+            flash('Post updated', category='success')
+            return render_template('update_post.html', article=article)
+        except IntegrityError:
+            db.session.rollback()
+            flash('Update post error: Enter a unique post title!', category='error')
+
+    return render_template('update_post.html', title='Update post', article=article)
 
 
 @app.route("/add-post", methods=["POST", "GET"])
