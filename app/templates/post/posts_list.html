@@ -10,14 +10,14 @@
     <br>
   {%endfor%}
 
-  {%for article in articles%}
+  {%for post in posts%}
   <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
     <div class="col p-4 d-flex flex-column position-static">
-      <h3 class="mb-0">{{article.title}}</h3>
-      <div class="mb-1 text-muted">{{article.date|iso_time}}</div>
-      <p class="card-text mb-auto">{{article.text}}</p>
+      <h3 class="mb-0">{{post.title}}</h3>
+      <div class="mb-1 text-muted">{{post.date|iso_time}}</div>
+      <p class="card-text mb-auto">{{post.text}}</p>
       <p class="text-end">
-        <a href="{{ url_for('post_detail', post_id=article.id, post_slug=slugify(article.title)) }}" class="btn btn-primary">Continue reading</a>
+        <a href="{{ url_for('post.post_detail', post_id=post.id, post_slug=post.slug) }}" class="btn btn-primary">Continue reading</a>
       </p>
     </div>
   </div>

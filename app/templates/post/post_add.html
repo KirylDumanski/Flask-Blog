@@ -6,7 +6,7 @@
   {%for category, message in get_flashed_messages(True)%}
     <div class="flash {{category}}">{{message}}</div>
   {%endfor%}
-  <form action="/add-post" method="post">
+  <form action="" method="post">
     <p><label>Title: </label><input type="text" name="title" class="form-control" required/>
     <p><label>Text: </label><textarea class="form-control" name="text" cols="30" rows="10" required></textarea>
     <p class="text"><input type="submit" value="Publish" class="btn btn-primary"/>

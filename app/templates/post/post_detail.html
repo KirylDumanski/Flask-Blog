@@ -1,0 +1,20 @@
+{%extends 'base.html'%}
+
+{%block content%}
+{{super()}}
+
+<div class="col-md">
+  <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250">
+    <div class="col p-4 d-flex flex-column position-static">
+      <h2 class="mb-0">{{post.title}}</h2>
+      <div class="mb-1 text-muted small">{{post.date|iso_time}}</div>
+      <p class="card-text mb-auto">{{post.text}}</p>
+      <p class="text-end">
+        <a href="{{ url_for('post.post_update', post_id=post.id) }}" class="btn btn-primary">Edit</a>
+        <a href="{{ url_for('post.post_delete', post_id=post.id) }}" class="btn btn-danger">Delete</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+{%endblock%}
