@@ -8,6 +8,8 @@ from sqlalchemy import desc
 from sqlalchemy.exc import NoResultFound, IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
 
+from forms import LoginForm, RegisterForm
+
 SECRET_KEY = 'development_key'
 SQLALCHEMY_DATABASE_URI = 'sqlite:///flask-site.db'
 
@@ -178,34 +180,30 @@ def feedback():
 
 @app.route("/register", methods=["POST", "GET"])
 def register():
-    if request.method == 'POST':
-        if len(request.form['name']) > 4 and '@' in request.form['email'] \
-                and len(request.form['password1']) > 4 and request.form['password1'] == request.form['password2']:
-            try:
-                password_hash = generate_password_hash(request.form['password1'])
-                user = Users(email=request.form['email'],
-                             password=password_hash)
-                db.session.add(user)
-                db.session.flush()
+    form = RegisterForm()
+    if form.validate_on_submit():
+        try:
+            password_hash = generate_password_hash(form.password1.data)
+            user = Users(email=form.email.data,
+                         password=password_hash)
+            db.session.add(user)
+            db.session.flush()
 
-                user_profile = Profiles(name=request.form['name'],
-                                        age=request.form['age'],
-                                        city=request.form['city'],
-                                        user_id=user.id)
-                db.session.add(user_profile)
-                db.session.commit()
-                flash("You have successfully registered!", category='success')
-                return redirect(url_for('login'))
+            user_profile = Profiles(name=form.name.data,
+                                    age=form.age.data,
+                                    city=form.city.data,
+                                    user_id=user.id)
+            db.session.add(user_profile)
+            db.session.commit()
+            flash("You have successfully registered!", category='success')
+            return redirect(url_for('login'))
 
-            except Exception as e:
-                db.session.rollback()
-                print(e)
-                flash("Registration error", category='error')
+        except Exception as e:
+            db.session.rollback()
+            print(e)
+            flash("Registration error", category='error')
 
-        else:
-            flash("Fields filled out incorrectly")
-
-    return render_template('register.html', title='Sign up')
+    return render_template('register.html', title='Sign up', form=form)
 
 
 @app.route("/login", methods=["POST", "GET"])
@@ -213,17 +211,21 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('profile'))
 
-    if request.method == 'POST':
-        user = Users.query.filter_by(email=request.form['email']).one()
-        if user and check_password_hash(user.password, request.form['password']):
-            rm = True if request.form.get('remember_me') else False
-            login_user(user, remember=rm)
-            flash('Logged in successfully.', category='success')
-            return redirect(request.args.get('next') or url_for('profile'))
-        else:
+    form = LoginForm()
+    if form.validate_on_submit():  # check if request.method == "POST", also use validators to check entered value
+        try:
+            user = Users.query.filter_by(email=form.email.data).one()
+            if user and check_password_hash(user.password, form.password.data):
+                rm = form.remember.data
+                login_user(user, remember=rm)
+                flash('Logged in successfully.', category='success')
+                return redirect(request.args.get('next') or url_for('profile'))
+            else:
+                flash('Incorrect username and/or password entered', category='error')
+        except NoResultFound:
             flash('Incorrect username and/or password entered', category='error')
 
-    return render_template('login.html', title='Authorization')
+    return render_template('login.html', title='Authorization', form=form)
 
 
 @app.route('/logout')

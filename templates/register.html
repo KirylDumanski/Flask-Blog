@@ -9,13 +9,23 @@
   <div class="flash {{category}}">{{message}}</div>
   {%endfor%}
   <form action="" method="post">
-    <p><label>Name: </label><input type="text" name="name" class="form-control" required></p>
-    <p><label>Age: </label><input type="text" name="age" class="form-control" required></p>
-    <p><label>City: </label><input type="text" name="city" class="form-control" required></p>
-    <p><label>Email: </label><input type="text" name="email" class="form-control" required></p>
-    <p><label>Password: </label><input type="password" name="password1" class="form-control" required></p>
-    <p><label>Confirm password: </label><input type="password" name="password2" class="form-control" required></p>
-    <p class="text"><input type="submit" value="Sign up" class="btn btn-primary"/></p>
+    {{form.hidden_tag()}}
+    {%for field in form if field.name not in ['csrf_token', 'submit', 'remember']%}
+    <p>
+      {{field.label}}
+      {%if field.errors%}
+      {{field(class="form-control is-invalid")}}
+      <span class="invalid-feedback">
+          {%for error in field.errors%}
+            {{error}}
+          {%endfor%}
+        </span>
+      {%else%}
+      {{field(class="form-control")}}
+      {%endif%}
+    </p>
+    {%endfor%}
+    <p>{{form.submit(class="btn btn-primary")}}</p>
   </form>
 </div>
 

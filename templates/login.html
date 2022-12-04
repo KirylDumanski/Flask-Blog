@@ -8,13 +8,23 @@
   <div class="flash {{category}}">{{message}}</div>
   {%endfor%}
   <form action="" method="post">
-    <p><label>Email: </label><input type="text" name="email" class="form-control" required></p>
-    <p><label>Password: </label><input type="password" name="password" class="form-control" required></p>
-    <p><input type="checkbox" name="remember_me"> Remember me</p>
-    <p class="text">
-      <input type="submit" value="Login" class="btn btn-primary"/>
-      <a href="{{url_for('register')}}" class="btn btn-success">Sign up</a>
+    {{form.hidden_tag()}}
+    <p>
+      {{form.email.label}}
+      {%if form.email.errors%}
+      {{form.email(class="form-control is-invalid")}}
+      <span class="invalid-feedback">
+          {%for error in form.email.errors%}
+            {{error}}
+          {%endfor%}
+        </span>
+      {%else%}
+      {{form.email(class="form-control")}}
+      {%endif%}
     </p>
+    <p>{{form.password.label}} {{form.password(class="form-control")}}</p>
+    <p>{{form.remember()}} {{form.remember.label}}</p>
+    <p>{{form.submit(class_="btn btn-primary")}}</p>
   </form>
 </div>
 
