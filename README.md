@@ -1,20 +1,16 @@
-# Welcome to my Flask-Blog
+# Flask-Blog
 
 ## Introduction
-"Flask-blog" is an application based on Python using the Flask microframework.
+"Flask-blog" is a simple application based on Python using the Flask microframework. It implements CRUD functionality.
 
 ## Technology stack
 * Python 3.8
 * Flask
 * SQLAlchemy ORM
 * Flask-login
-* Bootstrap 5
 
 ## Installation Guide
 1. Clone git repository:
-```
-git clone https://github.com/KirylDumanski/Flask-site.git
-```
 2. Install a Virtual Environment.
 3. Install the dependencies.
 ```
